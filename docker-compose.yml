@@ -1,0 +1,18 @@
+version: '3'
+services:
+  crud-backend:
+    build: ./crud/backend
+    ports:
+      - "8080:8080"
+  crud-frontend:
+    build: ./crud/frontend
+    ports:
+      - "3000:3000"
+  bustablo-backend:
+    build: ./bus-tablo/backend
+    ports:
+      - "8081:8081"
+  bustablo-frontend:
+    build: ./bus-tablo/frontend
+    ports:
+      - "3001:3000"

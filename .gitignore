@@ -1,0 +1,5 @@
+crud/frontend/node_modules
+crud/backend/node_modules
+/node_modules
+/target
+*.log
