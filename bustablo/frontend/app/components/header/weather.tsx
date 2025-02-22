@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Cloud,
-  CloudDrizzle,
-  CloudFog,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  Sun,
-} from "lucide-react";
+import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun } from 'lucide-react';
 import type { WeatherData } from "../../types";
 
 interface WeatherProps {
@@ -40,7 +32,7 @@ export function Weather({ data }: WeatherProps) {
   const WeatherIcon = weatherIcons[data.condition];
 
   return (
-    <div className="flex-1 flex items-center justify-between px-6 bg-green-800 text-white p-3">
+    <div className="w-3/5 inline-flex items-center justify-between bg-indigo-800 text-white p-3 rounded-lg">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <WeatherIcon className="w-8 h-8" />
@@ -52,7 +44,7 @@ export function Weather({ data }: WeatherProps) {
           <div>Ветер: {data.windSpeed} км/ч</div>
         </div>
       </div>
-      <div className="text-right">
+      <div className="ml-4 text-right">
         <div className="text-lg">
           {currentTime.toLocaleDateString("ru-RU", {
             day: "2-digit",

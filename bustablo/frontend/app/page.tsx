@@ -6,6 +6,7 @@ import { Footer } from "./components/footer/footer";
 import RouteTimeline from "./components/route-timeline";
 import type { Stop, WeatherData, BusData } from "./types";
 
+
 export default function Home() {
   const initialStops: Stop[] = [
     { id: 1, name: "Площадь Согласия", status: "current" },
@@ -42,7 +43,7 @@ export default function Home() {
   };
   const busData: BusData = {
     number: "26",
-    id: "A454GF56GD",
+    id: "123 ABC kz",
   };
 
   useEffect(() => {
@@ -65,15 +66,15 @@ export default function Home() {
   }, [currentStopIndex, stops.length]);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="text-lg h-screen flex flex-col">
       <Header weatherData={weatherData} busData={busData} />
 
-      <div className="h-screen flex flex-row">
-        <div className="h-full">
+      <div className="text-lg h-screen flex flex-row">
+        <div className="border-[#2563EB] text-xl h-full">
           <RouteTimeline stops={stops} currentStopIndex={currentStopIndex} />
         </div>
-        <div className="flex flex-col w-full">
-          <div className="flex-grow VIDEOCONTAINER w-full"></div>
+        <div className="text-lg flex flex-col w-full">
+          <div className="text-lg flex-grow VIDEOCONTAINER w-full"></div>
           <Footer currentStop={stops[currentStopIndex]} />
         </div>
       </div>

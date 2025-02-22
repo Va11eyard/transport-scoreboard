@@ -6,8 +6,8 @@ interface CurrentStopProps {
 
 export function CurrentStop({ stop }: CurrentStopProps) {
   return (
-    <div className=" w-full flex items-center justify-end px-8 bg-gray-500">
-      <h2 className="text-5xl text-white font-medium">{stop.name}</h2>
+    <div className=" w-full flex items-center justify-start px-8 border-[#D1D5DB]">
+      <h2 className="text-6xl text-white font-medium">{stop.name}</h2>
     </div>
   );
 }

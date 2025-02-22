@@ -8,7 +8,7 @@ interface FooterProps {
 
 export function Footer({ currentStop }: FooterProps) {
   return (
-    <footer className="flex h-[6rem] bg-green-800 mt-auto">
+    <footer className="flex h-[6rem] text-6xl bg-indigo-800 mt-auto">
       <CurrentStop stop={currentStop} />
       <FareInfo />
     </footer>
