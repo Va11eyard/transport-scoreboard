@@ -16,22 +16,22 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api")
 @AllArgsConstructor
 public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/login")
-    private ResponseEntity<?> login(
-            @RequestBody UserLoginDto loginDto
-    ){
-      LOGGER.debug("EMAIL IS: "+ loginDto.getEmail() + " PASSWORD IS: " + loginDto.getPassword());
+    public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto) {
+        LOGGER.debug("EMAIL IS: " + loginDto.getEmail() + " PASSWORD IS: " + loginDto.getPassword());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
@@ -44,21 +44,16 @@ public class AuthController {
 
         UserDetails userDetails = userService.loadUserByUsername(loginDto.getEmail());
         String jwt = jwtTokenUtil.generateToken(userDetails);
-
-        return ResponseEntity.ok().body(new JwtResponse(jwt));
+        return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
     @PostMapping("/register")
-    private ResponseEntity<String> register(
-            @RequestBody UserCreateDto createDto
-    ){
-        try{
+    public ResponseEntity<String> register(@RequestBody UserCreateDto createDto) {
+        try {
             userService.createUser(createDto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("User registered successfully.");
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid input: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input: " + e.getMessage());
         }
     }
 }

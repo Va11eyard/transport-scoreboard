@@ -1,16 +1,14 @@
 package org.example.java.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
-import org.example.java.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +16,19 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
-
     @Value("${jwt.secret}")
-    private String secretKey;
+    private String SECRET_KEY;
 
-    @Getter
     @Value("${jwt.access.token.expiration}")
-    private long accessTokenExpiration;
+    private long EXPIRATION_TIME;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
+    private final JwtParser jwtParser;
+
+    public JwtTokenUtil(@Value("${jwt.secret}") String secret) {
+        this.jwtParser = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                .build();
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -42,11 +44,7 @@ public class JwtTokenUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return jwtParser.parseSignedClaims(token).getPayload();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -54,32 +52,22 @@ public class JwtTokenUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
-        if (!(userDetails instanceof User)) {
-            throw new IllegalArgumentException("UserDetails must be an instance of User");
-        }
-
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities());
-
-        return generateToken(claims, userDetails);
+        return createToken(claims, userDetails.getUsername());
     }
 
-    private String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        String email = ((User) userDetails).getEmail();
+    private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .claims(claims)
-                .subject(email)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        LOGGER.warn("Extracted username: {}", username);
-        LOGGER.warn("Expected username: {}", userDetails.getUsername());
-        LOGGER.warn("Is token expired: {}", isTokenExpired(token));
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

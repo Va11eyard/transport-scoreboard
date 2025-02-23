@@ -1,16 +1,12 @@
 package org.example.java.dto.response;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class JwtResponse {
-    private String jwt;
+    private String token;
 
-    public JwtResponse(String jwt) {
-        this.jwt = jwt;
+    public JwtResponse(String token) {
+        this.token = token;
     }
 }

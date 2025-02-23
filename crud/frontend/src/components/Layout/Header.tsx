@@ -17,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ setIsAuthenticated }) => {
   }
 
   return (
-    <header className="bg-primary shadow-lg">
+    <header className="bg-black shadow-lg">
       <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">Transport Scoreboard</h1>

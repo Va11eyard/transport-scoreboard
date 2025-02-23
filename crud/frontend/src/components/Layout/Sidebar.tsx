@@ -22,13 +22,13 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <button
-        className="fixed p-2 bg-primary text-white rounded-tr-md rounded-br-md lg:hidden z-20 mt-2 ml-2"
+        className="fixed p-2 bg-black text-white rounded-tr-md rounded-br-md lg:hidden z-20 mt-2 ml-2"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Menu size={24} />
       </button>
       <div
-        className={`bg-primary text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${
+        className={`bg-black text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:relative lg:translate-x-0 transition duration-200 ease-in-out z-10 min-h-screen`}
       >

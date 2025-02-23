@@ -1,65 +1,80 @@
 package org.example.java.service.impl;
 
-import lombok.AllArgsConstructor;
 import org.example.java.dto.request.UserCreateDto;
 import org.example.java.dto.request.UserUpdateDto;
-import org.example.java.model.User;
 import org.example.java.repository.UserRepository;
 import org.example.java.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
-    public Page<User> allUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public Page<UserDetails> allUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(user -> User.withUsername(user.getEmail())
+                        .password(user.getPassword())
+                        .roles("user")
+                        .build());
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return User.withUsername(user.getEmail())
+                .password(user.getPassword())
+                .roles("user")
+                .build();
     }
 
     @Override
-    public User getUserById(int userId) {
-        return userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User not found."));
+    public UserDetails getUserById(int id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return User.withUsername(user.getEmail())
+                .password(user.getPassword())
+                .roles("user")
+                .build();
     }
 
     @Override
-    public User createUser(UserCreateDto userDto) {
-        User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setActive(true);
-        user.setRole(userDto.getRole());
-
-        return userRepository.save(user);
+    public void createUser(UserCreateDto createDto) {
+        UserEntity user = new UserEntity();
+        user.setEmail(createDto.getEmail());
+        user.setPassword(passwordEncoder.encode(createDto.getPassword()));
+        userRepository.save(user);
     }
 
     @Override
-    public User updateUser(int userId, UserUpdateDto userDto) {
-        User user = userRepository.findById(userId).orElse(null);
-        if(user!=null) {
-            if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
-            if (userDto.getPassword() != null) user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            if (userDto.getRole() != null) user.setRole(userDto.getRole());
-            return userRepository.save(user);
-        }
-        return null;
+    public UserDetails updateUser(int id, UserUpdateDto updateDto) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        user.setPassword(passwordEncoder.encode(updateDto.getPassword()));
+        userRepository.save(user);
+        return User.withUsername(user.getEmail())
+                .password(user.getPassword())
+                .roles("user")
+                .build();
     }
 
     @Override
-    public void deleteUser(int userId) {
-        userRepository.findById(userId).ifPresent(userRepository::delete);
+    public void deleteUser(int id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        userRepository.delete(user);
     }
-
 }
