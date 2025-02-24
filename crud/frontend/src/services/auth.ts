@@ -1,15 +1,16 @@
-import api from "./api"
+// auth.ts
+import api from "./api";
 
+// Match backend JwtResponse
 interface LoginResponse {
-  access_token: string
-  token_type: string
+  token: string; // Changed from access_token to token
 }
-
 
 export const login = async (email: string, password: string) => {
   try {
     const response = await api.post<LoginResponse>("/login", { email, password });
-    localStorage.setItem("token", response.data.access_token);
+    localStorage.setItem("token", response.data.token); // Store token
+    console.log("Login successful, token stored:", response.data.token); // Debug
     return response.data;
   } catch (error: any) {
     console.error("Login error:", error.message);
@@ -17,6 +18,7 @@ export const login = async (email: string, password: string) => {
   }
 };
 
+// Other functions unchanged...
 export const register = async (email: string, password: string) => {
   try {
     const response = await api.post<{ message: string }>("/register", { email, password });

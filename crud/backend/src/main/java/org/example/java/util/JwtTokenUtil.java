@@ -43,7 +43,7 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) { // Changed to public
         return jwtParser.parseSignedClaims(token).getPayload();
     }
 
@@ -53,6 +53,9 @@ public class JwtTokenUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(Object::toString)
+                .toList());
         return createToken(claims, userDetails.getUsername());
     }
 

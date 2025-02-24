@@ -11,8 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -25,38 +27,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserDetails> allUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
-                .map(user -> User.withUsername(user.getEmail())
-                        .password(user.getPassword())
-                        .roles("user")
-                        .build());
+                .map(this::mapToUserDetails);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-        return User.withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles("user")
-                .build();
+        return mapToUserDetails(user);
     }
 
     @Override
     public UserDetails getUserById(int id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        return User.withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles("user")
-                .build();
+        return mapToUserDetails(user);
     }
 
     @Override
-    public void createUser(UserCreateDto createDto) {
+    @Transactional
+    public UserDetails createUser(UserCreateDto createDto) {
         UserEntity user = new UserEntity();
         user.setEmail(createDto.getEmail());
         user.setPassword(passwordEncoder.encode(createDto.getPassword()));
         userRepository.save(user);
+        return mapToUserDetails(user);
     }
 
     @Override
@@ -65,10 +60,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         user.setPassword(passwordEncoder.encode(updateDto.getPassword()));
         userRepository.save(user);
-        return User.withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles("user")
-                .build();
+        return mapToUserDetails(user);
     }
 
     @Override
@@ -76,5 +68,12 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         userRepository.delete(user);
+    }
+
+    private UserDetails mapToUserDetails(UserEntity user) {
+        return User.withUsername(user.getEmail())
+                .password(user.getPassword())
+                .roles("user") // Spring Security expects "ROLE_user" internally
+                .build();
     }
 }

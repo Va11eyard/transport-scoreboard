@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public interface UserService extends UserDetailsService {
     Page<UserDetails> allUsers(Pageable pageable);
     UserDetails getUserById(int id);
-    void createUser(UserCreateDto createDto);
+    UserDetails createUser(UserCreateDto createDto); // Return UserDetails for confirmation
     UserDetails updateUser(int id, UserUpdateDto updateDto);
     void deleteUser(int id);
 }

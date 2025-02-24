@@ -1,23 +1,22 @@
+// api.ts
 import axios from "axios";
 
-// Allow dynamic baseURL for troubleshooting
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8080/api", // Use env var or default
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8080/api", // Correct base URL
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
-  timeout: 10000, // 10-second timeout
+  timeout: 10000,
 });
 
-// Request interceptor for token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
+    console.log("Request sent:", config.method, config.url, "Token:", token || "No token found");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log("Request sent:", config.method, config.url); // Debug log
     return config;
   },
   (error) => {
@@ -26,7 +25,6 @@ api.interceptors.request.use(
   },
 );
 
-// Error interface
 interface ApiError {
   isAxiosError: boolean;
   response?: {
@@ -37,7 +35,6 @@ interface ApiError {
   message?: string;
 }
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {

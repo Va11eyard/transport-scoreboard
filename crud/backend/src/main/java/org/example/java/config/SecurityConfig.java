@@ -2,6 +2,8 @@ package org.example.java.config;
 
 import org.example.java.service.UserService;
 import org.example.java.util.JwtRequestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -31,6 +33,8 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
     private final JwtRequestFilter jwtRequestFilter;
     private final UserService userService;
 
@@ -41,6 +45,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        logger.debug("Configuring Spring Security filter chain");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -48,18 +53,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/login", "/api/register").permitAll()
-                        .requestMatchers("/users/**", "/videos/**").hasRole("user")
+                        .requestMatchers("/api/users/**", "/api/videos/**").hasAuthority("ROLE_user")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .userDetailsService(userService)
-                .authenticationProvider(authenticationProvider())
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpStatus.OK.value()))
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, authEx) -> {
+                            logger.debug("Authentication failed for " + req.getRequestURI() + ": " + authEx.getMessage());
+                            res.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden: " + authEx.getMessage());
+                        })
+                        .accessDeniedHandler((req, res, accessEx) -> {
+                            logger.debug("Access denied for " + req.getRequestURI() + ": " + accessEx.getMessage());
+                            res.sendError(HttpStatus.FORBIDDEN.value(), "Access Denied: " + accessEx.getMessage());
+                        })
                 );
 
         return http.build();
@@ -80,7 +86,7 @@ public class SecurityConfig {
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults("");
+        return new GrantedAuthorityDefaults(""); // No "ROLE_" prefix needed
     }
 
     @Bean
@@ -95,7 +101,6 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
