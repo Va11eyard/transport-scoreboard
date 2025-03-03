@@ -8,6 +8,6 @@ import org.springframework.data.domain.Pageable;
 public interface VideoService {
     Page<VideoEntity> allVideos(Pageable pageable);
     VideoEntity getVideoById(int id);
-    VideoEntity createVideo(VideoCreateDto createDto); // Return VideoEntity
+    VideoEntity createVideo(VideoCreateDto createDto);
     void deleteVideo(int id);
 }

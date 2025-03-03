@@ -53,9 +53,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/login", "/api/register").permitAll()
-                        .requestMatchers("/api/users/**", "/api/videos/**").hasAuthority("ROLE_user")
+                        .requestMatchers(HttpMethod.GET,"/api/users/**", "/api/videos/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, authEx) -> {
@@ -97,12 +98,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.addAllowedOriginPattern("*"); // Allows any origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(List.of("*")); // Allows all headers
+        configuration.setAllowCredentials(true); // Important for cookies or Authorization headers
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

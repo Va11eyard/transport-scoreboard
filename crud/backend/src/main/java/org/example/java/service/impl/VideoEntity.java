@@ -1,17 +1,19 @@
 package org.example.java.service.impl;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity(name = "video_entity")
+@Entity
+@Table(name = "videos")
 @Data
 public class VideoEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
+
     private String title;
-    private String filePath;
+
+    @Column(name = "file_path")
+    private String filePath; // Store the path to the uploaded file on disk
 }
