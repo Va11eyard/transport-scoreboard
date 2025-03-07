@@ -78,4 +78,14 @@ public class VideoController {
         videoService.deleteVideo(id);
         return ResponseEntity.noContent().build();
     }
+    // VideoController.java (add the following method)
+    @GetMapping("/next")
+    public ResponseEntity<VideoEntity> getNextVideo(@RequestParam(name = "lastVideoId", required = false) Integer lastVideoId) {
+        VideoEntity nextVideo = videoService.getNextVideo(lastVideoId);
+        if (nextVideo == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(nextVideo);
+    }
+
 }

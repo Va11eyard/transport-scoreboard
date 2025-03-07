@@ -1,3 +1,4 @@
+// VideoService.java
 package org.example.java.service;
 
 import org.example.java.dto.request.VideoCreateDto;
@@ -10,4 +11,7 @@ public interface VideoService {
     VideoEntity getVideoById(int id);
     VideoEntity createVideo(VideoCreateDto createDto);
     void deleteVideo(int id);
+
+    // Task 2: Get the next video given an optional last video ID
+    VideoEntity getNextVideo(Integer lastVideoId);
 }

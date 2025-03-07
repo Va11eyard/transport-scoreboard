@@ -7,19 +7,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 @Transactional
 public class VideoServiceImpl implements VideoService {
 
     private final VideoRepository videoRepository;
-
-    // Change to an absolute path if needed, e.g. "C:/myapp/uploads/videos/" or "/home/user/uploads/videos/"
-    private static final String UPLOAD_DIR = "uploads/videos/";
+    private static final String UPLOAD_DIR = "uploads/videos/"; // Adjust path as needed
 
     public VideoServiceImpl(VideoRepository videoRepository) {
         this.videoRepository = videoRepository;
@@ -39,15 +37,13 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public VideoEntity createVideo(VideoCreateDto createDto) {
         try {
-            // 1) Save file to disk
+            // Save file to disk and get its path
             String filePath = saveFile(createDto.getFile(), createDto.getTitle());
-
-            // 2) Create VideoEntity with the file path
             VideoEntity video = new VideoEntity();
             video.setTitle(createDto.getTitle());
             video.setFilePath(filePath);
-
-            // 3) Save entity in DB
+            // Generate a unique UUID for the video
+            video.setUuid(UUID.randomUUID().toString());
             videoRepository.save(video);
             return video;
         } catch (Exception e) {
@@ -57,32 +53,41 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public void deleteVideo(int id) {
-        VideoEntity video = videoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Video not found with id: " + id));
+        VideoEntity video = getVideoById(id);
         try {
-            // Delete file from disk if it exists
             Files.deleteIfExists(Paths.get(video.getFilePath()));
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete video file: " + e.getMessage());
         }
-        // Delete DB record
         videoRepository.delete(video);
     }
 
     private String saveFile(byte[] fileBytes, String title) throws Exception {
-        // Ensure the directory exists
         Path uploadPath = Paths.get(UPLOAD_DIR);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
-
-        // Create a unique file name
+        // Create a unique filename (spaces replaced with underscores)
         String sanitizedTitle = title.replaceAll("\\s+", "_");
         String fileName = sanitizedTitle + "_" + System.currentTimeMillis() + ".mp4";
         Path filePath = uploadPath.resolve(fileName);
-
-        // Write bytes to disk
         Files.write(filePath, fileBytes);
         return filePath.toString();
     }
+
+    @Override
+    public VideoEntity getNextVideo(Integer lastVideoId) {
+        if (lastVideoId == null) {
+            // No last video provided, return the first video in order
+            return videoRepository.findFirstByOrderByIdAsc();
+        }
+        // Try to find the next video with an ID greater than lastVideoId
+        VideoEntity nextVideo = videoRepository.findFirstByIdGreaterThanOrderByIdAsc(lastVideoId);
+        if (nextVideo == null) {
+            // Wrap around to the first video if no higher ID exists
+            return videoRepository.findFirstByOrderByIdAsc();
+        }
+        return nextVideo;
+    }
+
 }
