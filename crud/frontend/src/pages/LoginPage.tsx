@@ -10,7 +10,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     return (
         <Layout>
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
                 <Login setIsAuthenticated={setIsAuthenticated} />
             </div>
         </Layout>

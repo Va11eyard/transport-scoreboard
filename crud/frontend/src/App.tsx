@@ -1,4 +1,3 @@
-// App.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
@@ -12,6 +11,9 @@ import Sidebar from "./components/Layout/Sidebar";
 import ResetPasswordRequest from "./components/Auth/ResetPasswordRequest";
 import ResetPassword from "./components/Auth/ResetPassword";
 import Layout from "./components/Layout/Layout";
+// New imports for Companies
+import CompaniesPage from "./pages/Companies/page";
+import CompanyDetailPage from "./pages/Companies/[id]/page";
 
 const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -25,7 +27,6 @@ const App: React.FC = () => {
         <Router>
             <div className="min-h-screen bg-gray-50">
                 {!isAuthenticated ? (
-                    // For public pages, you may still use the Layout for unified padding and background
                     <Routes>
                         <Route
                             path="/login"
@@ -62,18 +63,21 @@ const App: React.FC = () => {
                         <Route path="*" element={<Navigate to="/login" replace />} />
                     </Routes>
                 ) : (
-                    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+                    <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex-1 flex flex-col overflow-hidden">
+                        <div className="flex-1 ml-64 flex flex-col overflow-hidden">
                             <Header setIsAuthenticated={setIsAuthenticated} />
                             <main className="flex-1 overflow-auto">
-                                {/* Wrap authenticated pages with the Layout for unified styling */}
                                 <Layout>
                                     <Routes>
                                         <Route path="/" element={<DashboardPage />} />
                                         <Route path="/users" element={<UsersPage />} />
                                         <Route path="/videos" element={<VideosPage />} />
-                                        <Route path="/companies/*" element={<></>} />
+
+                                        {/* New routes for Companies */}
+                                        <Route path="/companies" element={<CompaniesPage />} />
+                                        <Route path="/companies/:id" element={<CompanyDetailPage />} />
+
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
                                 </Layout>

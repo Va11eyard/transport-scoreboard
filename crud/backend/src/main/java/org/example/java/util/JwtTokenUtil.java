@@ -19,8 +19,9 @@ public class JwtTokenUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    @Value("${jwt.access.token.expiration}")
-    private long EXPIRATION_TIME;
+    // Removed expiration property since tokens will not expire
+    // @Value("${jwt.access.token.expiration}")
+    // private long EXPIRATION_TIME;
 
     private final JwtParser jwtParser;
 
@@ -43,12 +44,14 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    public Claims extractAllClaims(String token) { // Changed to public
+    public Claims extractAllClaims(String token) {
         return jwtParser.parseSignedClaims(token).getPayload();
     }
 
+    // Remove token expiration validation
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        Date expiration = extractExpiration(token);
+        return expiration != null && expiration.before(new Date());
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -61,16 +64,18 @@ public class JwtTokenUtil {
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .claims(claims)
-                .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                // Removed expiration to make token unexpirable
+                //.expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        // If expiration is not set, then skip that check
+        return (username.equals(userDetails.getUsername()) /*&& !isTokenExpired(token)*/);
     }
 }

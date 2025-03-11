@@ -18,39 +18,28 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ onUpload }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded shadow max-w-md mx-auto">
             <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                    Video Title
-                </label>
+                <label className="block text-sm font-medium">Video Title</label>
                 <input
                     type="text"
-                    id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
-                    className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3"
+                    className="mt-1 block w-full border rounded p-2"
                 />
             </div>
-
             <div>
-                <label htmlFor="video" className="block text-sm font-medium text-gray-700">
-                    Choose video file
-                </label>
+                <label className="block text-sm font-medium">Choose Video File</label>
                 <input
                     type="file"
-                    id="video"
                     accept="video/*"
                     onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                     required
                     className="mt-1 block w-full"
                 />
             </div>
-
-            <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white"
-            >
+            <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded hover:bg-primary-hover transition">
                 Upload Video
             </button>
         </form>

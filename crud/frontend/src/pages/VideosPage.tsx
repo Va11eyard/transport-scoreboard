@@ -1,8 +1,10 @@
+// /src/pages/VideosPage.tsx
 import React, { useState, useEffect } from "react";
 import VideoList from "../components/Videos/VideoList";
 import VideoUpload from "../components/Videos/VideoUpload";
 import VideoPlayer from "../components/Videos/VideoPlayer";
 import { getVideos, uploadVideo, deleteVideo } from "../services/videos";
+import Layout from "../components/Layout/Layout";
 
 interface Video {
   id: number;
@@ -28,6 +30,10 @@ const VideosPage: React.FC = () => {
     }
   };
 
+  const handleSelectVideo = (video: Video) => {
+    setSelectedVideo(video);
+  };
+
   const handleUploadVideo = async (file: File, title: string) => {
     try {
       await uploadVideo(file, title);
@@ -50,25 +56,17 @@ const VideosPage: React.FC = () => {
   };
 
   return (
-      <div className="container mx-auto px-4 py-8">
+      <Layout>
         <h1 className="text-2xl font-bold mb-4">Videos</h1>
         {error && <p className="text-red-500">{error}</p>}
-
         <VideoUpload onUpload={handleUploadVideo} />
-
-        <div className="flex mt-8">
-          <div className="w-1/3 pr-4">
-            <VideoList
-                videos={videos}
-                onSelectVideo={setSelectedVideo}
-                onDeleteVideo={handleDeleteVideo}
-            />
+        <div className="flex flex-col md:flex-row mt-8 gap-4">
+          <div className="md:w-1/3">
+            <VideoList videos={videos} onSelectVideo={handleSelectVideo} onDeleteVideo={handleDeleteVideo} />
           </div>
-          <div className="w-2/3">
-            {selectedVideo && <VideoPlayer video={selectedVideo} />}
-          </div>
+          <div className="md:w-2/3">{selectedVideo && <VideoPlayer video={selectedVideo} />}</div>
         </div>
-      </div>
+      </Layout>
   );
 };
 

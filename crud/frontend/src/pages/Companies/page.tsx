@@ -1,4 +1,3 @@
-// /src/pages/Companies/page.tsx
 import React, { useEffect, useState } from "react";
 import CompanyList from "../../components/Companies/CompanyList";
 import { Company, getCompanies } from "../../services/company";

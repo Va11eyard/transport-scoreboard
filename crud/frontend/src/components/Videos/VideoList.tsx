@@ -12,21 +12,15 @@ interface VideoListProps {
   onDeleteVideo: (id: number) => void;
 }
 
-const VideoList: React.FC<VideoListProps> = ({ videos, onSelectVideo, onDeleteVideo }) => {
+const VideoList: React.FC<VideoListProps> = ({videos, onSelectVideo, onDeleteVideo}) => {
   return (
-      <ul>
+      <ul className=" bg-white rounded shadow max-w-md p-4 ">
         {videos.map((video) => (
-            <li key={video.id} className="flex items-center justify-between mb-2">
-              <button
-                  onClick={() => onSelectVideo(video)}
-                  className="text-blue-500 underline"
-              >
+            <li key={video.id} className="flex w-full items-center justify-between mb-2">
+              <button onClick={() => onSelectVideo(video)} className="text-blue-500 underline">
                 {video.title}
               </button>
-              <button
-                  onClick={() => onDeleteVideo(video.id)}
-                  className="text-red-500 ml-4"
-              >
+              <button onClick={() => onDeleteVideo(video.id)} className="text-red-500 ml-4">
                 Delete
               </button>
             </li>
