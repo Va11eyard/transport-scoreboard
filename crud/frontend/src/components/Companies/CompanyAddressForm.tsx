@@ -1,49 +1,49 @@
 // /src/components/Companies/CompanyAddressForm.tsx
 import React, { useState } from "react";
 
-interface CompanyAddressFormProps {
-    initialData?: {
-        address: string;
-        latitude: number;
-        longitude: number;
-        isActive: boolean;
-        video?: { name: string; activeFromDate: string; activeToDate: string };
-    };
-    onSubmit: (data: {
-        address: string;
-        latitude: number;
-        longitude: number;
-        isActive: boolean;
-        video?: { name: string; activeFromDate: string; activeToDate: string };
-    }) => Promise<void>;
+interface AddressFormData {
+    companyId: number;
+    address: string;
+    latitude: number;
+    longitude: number;
+    isActive: boolean;
 }
 
-const CompanyAddressForm: React.FC<CompanyAddressFormProps> = ({ initialData, onSubmit }) => {
-    const [address, setAddress] = useState(initialData?.address || "");
-    const [latitude, setLatitude] = useState(initialData?.latitude || 0);
-    const [longitude, setLongitude] = useState(initialData?.longitude || 0);
-    const [isActive, setIsActive] = useState(initialData?.isActive || false);
-    const [videoName, setVideoName] = useState(initialData?.video?.name || "");
-    const [activeFromDate, setActiveFromDate] = useState(initialData?.video?.activeFromDate || "");
-    const [activeToDate, setActiveToDate] = useState(initialData?.video?.activeToDate || "");
+interface CompanyAddressFormProps {
+    initialData: AddressFormData;
+    onSubmit: (data: AddressFormData) => void;
+    onCancel?: () => void;
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
+const CompanyAddressForm: React.FC<CompanyAddressFormProps> = ({ initialData, onSubmit, onCancel }) => {
+    const [formData, setFormData] = useState<AddressFormData>(initialData);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const video =
-            videoName && activeFromDate && activeToDate
-                ? { name: videoName, activeFromDate, activeToDate }
-                : undefined;
-        await onSubmit({ address, latitude, longitude, isActive, video });
+        onSubmit({
+            ...formData,
+            latitude: Number(formData.latitude),
+            longitude: Number(formData.longitude),
+        });
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded bg-white">
+        <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded bg-white max-w-md mx-auto">
             <div>
                 <label className="block text-sm font-medium">Address</label>
                 <input
                     type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
                     required
                     className="mt-1 block w-full border rounded p-2"
                 />
@@ -53,8 +53,9 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = ({ initialData, on
                     <label className="block text-sm font-medium">Latitude</label>
                     <input
                         type="number"
-                        value={latitude}
-                        onChange={(e) => setLatitude(parseFloat(e.target.value))}
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleChange}
                         required
                         className="mt-1 block w-full border rounded p-2"
                     />
@@ -63,8 +64,9 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = ({ initialData, on
                     <label className="block text-sm font-medium">Longitude</label>
                     <input
                         type="number"
-                        value={longitude}
-                        onChange={(e) => setLongitude(parseFloat(e.target.value))}
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleChange}
                         required
                         className="mt-1 block w-full border rounded p-2"
                     />
@@ -74,48 +76,24 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = ({ initialData, on
                 <label className="inline-flex items-center">
                     <input
                         type="checkbox"
-                        checked={isActive}
-                        onChange={(e) => setIsActive(e.target.checked)}
+                        name="isActive"
+                        checked={formData.isActive}
+                        onChange={handleChange}
                         className="mr-2"
                     />
                     Active
                 </label>
             </div>
-            <div>
-                <h3 className="text-lg font-semibold">Address Video (Optional)</h3>
-                <div>
-                    <label className="block text-sm font-medium">Video Name</label>
-                    <input
-                        type="text"
-                        value={videoName}
-                        onChange={(e) => setVideoName(e.target.value)}
-                        className="mt-1 block w-full border rounded p-2"
-                    />
-                </div>
-                <div className="flex space-x-4">
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium">Active From</label>
-                        <input
-                            type="date"
-                            value={activeFromDate}
-                            onChange={(e) => setActiveFromDate(e.target.value)}
-                            className="mt-1 block w-full border rounded p-2"
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium">Active To</label>
-                        <input
-                            type="date"
-                            value={activeToDate}
-                            onChange={(e) => setActiveToDate(e.target.value)}
-                            className="mt-1 block w-full border rounded p-2"
-                        />
-                    </div>
-                </div>
+            <div className="flex space-x-2">
+                <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+                    Save Address
+                </button>
+                {onCancel && (
+                    <button type="button" onClick={onCancel} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition">
+                        Cancel
+                    </button>
+                )}
             </div>
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-                Save Address
-            </button>
         </form>
     );
 };

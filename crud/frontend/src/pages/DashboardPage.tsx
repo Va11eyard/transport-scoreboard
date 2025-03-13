@@ -1,7 +1,7 @@
-// /src/pages/DashboardPage.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout/Layout";
+import { UsersIcon, VideoCameraIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 
 const DashboardPage: React.FC = () => {
     return (
@@ -10,21 +10,24 @@ const DashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Link
                     to="/users"
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg text-center transition"
+                    className="bg-blue-50 text-blue-600 shadow-sm hover:bg-blue-100 hover:shadow-md rounded-lg p-6 flex flex-col items-center justify-center transition-all"
                 >
-                    Manage Users
+                    <UsersIcon className="h-12 w-12 mb-3" />
+                    <span className="text-xl font-medium">Manage Users</span>
                 </Link>
                 <Link
                     to="/videos"
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-center transition"
+                    className="bg-green-50 text-green-600 shadow-sm hover:bg-green-100 hover:shadow-md rounded-lg p-6 flex flex-col items-center justify-center transition-all"
                 >
-                    Manage Videos
+                    <VideoCameraIcon className="h-12 w-12 mb-3" />
+                    <span className="text-xl font-medium">Manage Videos</span>
                 </Link>
                 <Link
                     to="/companies"
-                    className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg text-center transition"
+                    className="bg-purple-50 text-purple-600 shadow-sm hover:bg-purple-100 hover:shadow-md rounded-lg p-6 flex flex-col items-center justify-center transition-all"
                 >
-                    Manage Companies
+                    <BuildingOfficeIcon className="h-12 w-12 mb-3" />
+                    <span className="text-xl font-medium">Manage Companies</span>
                 </Link>
             </div>
         </Layout>

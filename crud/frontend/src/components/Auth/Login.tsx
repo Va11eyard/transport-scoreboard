@@ -27,45 +27,58 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
 
   return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            <div className="rounded-md shadow-sm">
-              <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full px-3 py-2 border rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="mt-2 block w-full px-3 py-2 border rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-              />
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+                  Email address
+                </label>
+                <input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="mt-1 block w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    className="mt-1 block w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
             <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 rounded-md text-white bg-blue-800 hover:bg-primary-hover transition"
+                className="w-full flex justify-center py-3 px-4 rounded-md text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Sign in
             </button>
           </form>
           <div className="text-sm text-center mt-4">
-            <Link to="/register" className="font-medium text-primary hover:text-primary-hover">
-              Don't have an account? Register
-            </Link>
+            <p>
+              Don't have an account?{" "}
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-700">
+                Register
+              </Link>
+            </p>
           </div>
         </div>
       </div>

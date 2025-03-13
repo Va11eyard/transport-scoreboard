@@ -1,111 +1,91 @@
 // /src/components/Companies/CompanyPage.tsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Company } from "../../services/company";
+import React, { useState } from "react";
+import { Company, updateCompany, uploadCompanyVideo } from "../../services/company";
+import { CompanyAddress, createAddress, updateAddress, uploadAddressVideo } from "../../services/companyAddress";
 import CompanyForm from "./CompanyForm";
 import CompanyAddressForm from "./CompanyAddressForm";
 
-const CompanyPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const [company, setCompany] = useState<Company | null>(null);
+interface CompanyPageProps {
+    company: Company;
+    addresses: CompanyAddress[];
+    onAddressesChange: (addr: CompanyAddress[]) => void;
+}
+
+const CompanyPage: React.FC<CompanyPageProps> = ({ company: initialCompany, addresses: initialAddresses, onAddressesChange }) => {
+    const [company, setCompany] = useState<Company>(initialCompany);
     const [error, setError] = useState<string | null>(null);
+
     const [showCompanyForm, setShowCompanyForm] = useState(false);
-    const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
     const [showAddressForm, setShowAddressForm] = useState(false);
+    const [editingAddress, setEditingAddress] = useState<CompanyAddress | null>(null);
 
-    useEffect(() => {
-        if (id) {
-            fetchCompany(Number(id));
-        }
-    }, [id]);
-
-    const fetchCompany = async (companyId: number) => {
-        try {
-            const res = await fetch(`/api/companies/${companyId}`);
-            if (!res.ok) throw new Error("Failed to fetch company details");
-            const data = await res.json();
-            setCompany(data);
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
-    const handleCompanyUpdate = async (updatedData: {
+    // 1) Handle Company Update
+    const handleUpdateCompany = async (data: {
         name: string;
         description: string;
         isActive: boolean;
-        video?: { name: string; activeFromDate: string; activeToDate: string };
     }) => {
-        if (!company) return;
         try {
-            const res = await fetch(`/api/companies/${company.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData),
-            });
-            if (!res.ok) throw new Error("Failed to update company");
-            const data = await res.json();
-            setCompany(data);
+            const updated = await updateCompany(company.id, data);
+            setCompany(updated);
             setShowCompanyForm(false);
         } catch (err: any) {
             setError(err.message);
         }
     };
 
-    const handleAddressUpdate = async (
-        addressId: number,
-        updatedData: {
-            address: string;
-            latitude: number;
-            longitude: number;
-            isActive: boolean;
-            video?: { name: string; activeFromDate: string; activeToDate: string };
-        }
-    ) => {
-        if (!company) return;
+    // 2) Handle Company Video Upload
+    const handleUploadCompanyVideo = async (file: File) => {
         try {
-            const res = await fetch(`/api/companies/${company.id}/addresses/${addressId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData),
-            });
-            if (!res.ok) throw new Error("Failed to update address");
-            const data = await res.json();
-            setCompany((prev) => {
-                if (!prev) return prev;
-                const updatedAddresses = prev.addresses.map((addr) =>
-                    addr.id === addressId ? data : addr
-                );
-                return { ...prev, addresses: updatedAddresses };
-            });
-            setEditingAddressId(null);
+            await uploadCompanyVideo(company.id, file);
+            // Optionally refetch or update local state
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    // 3) Create or Update Address
+    const handleCreateAddress = async (data: {
+        companyId: number;
+        address: string;
+        latitude: number;
+        longitude: number;
+        isActive: boolean;
+    }) => {
+        try {
+            const newAddress = await createAddress(data);
+            onAddressesChange([...initialAddresses, newAddress]);
             setShowAddressForm(false);
         } catch (err: any) {
             setError(err.message);
         }
     };
 
-    const handleAddressCreate = async (updatedData: {
+    const handleUpdateAddress = async (addrId: number, data: {
         address: string;
         latitude: number;
         longitude: number;
         isActive: boolean;
-        video?: { name: string; activeFromDate: string; activeToDate: string };
     }) => {
-        if (!company) return;
         try {
-            const res = await fetch(`/api/companies/${company.id}/addresses`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData),
-            });
-            if (!res.ok) throw new Error("Failed to create address");
-            const data = await res.json();
-            setCompany((prev) => {
-                if (!prev) return prev;
-                return { ...prev, addresses: [...prev.addresses, data] };
-            });
+            const updated = await updateAddress(addrId, data);
+            // Replace old address with updated one
+            const newList = initialAddresses.map((a) => (a.id === updated.id ? updated : a));
+            onAddressesChange(newList);
+            setEditingAddress(null);
             setShowAddressForm(false);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    // 4) Upload Address Video
+    const handleUploadAddressVideo = async (addrId: number, file: File) => {
+        try {
+            await uploadAddressVideo(addrId, file);
+            // Optionally refetch addresses or update local state
+            setError(null);
         } catch (err: any) {
             setError(err.message);
         }
@@ -114,114 +94,131 @@ const CompanyPage: React.FC = () => {
     return (
         <div className="container mx-auto p-4">
             {error && <p className="text-red-500">{error}</p>}
-            {company ? (
-                <>
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold">{company.name}</h1>
-                        <p className="mt-2 text-gray-700">{company.description}</p>
-                        <p className="mt-1">Status: {company.isActive ? "Active" : "Inactive"}</p>
-                    </div>
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-semibold mb-2">Company Video</h2>
-                        {company.videos.length > 0 ? (
-                            <video controls className="w-full">
-                                <source src={company.videos[0].url} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        ) : (
-                            <p>No company video uploaded.</p>
-                        )}
-                    </div>
-                    <button
-                        onClick={() => setShowCompanyForm(!showCompanyForm)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded mb-6"
-                    >
-                        {showCompanyForm ? "Cancel" : "Edit Company Info"}
-                    </button>
-                    {showCompanyForm && (
-                        <CompanyForm
-                            initialData={{
-                                name: company.name,
-                                description: company.description,
-                                isActive: company.isActive,
-                                video: company.videos[0]
-                                    ? {
-                                        name: company.videos[0].name,
-                                        activeFromDate: company.videos[0].activeFromDate,
-                                        activeToDate: company.videos[0].activeToDate,
-                                    }
-                                    : undefined,
-                            }}
-                            onSubmit={handleCompanyUpdate}
-                        />
-                    )}
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold">{company.name}</h1>
+                <p className="mt-2 text-gray-700">{company.description}</p>
+                <p className="mt-1">Status: {company.isActive ? "Active" : "Inactive"}</p>
+            </div>
 
-                    <div className="mt-8">
-                        <h2 className="text-2xl font-semibold mb-4">Addresses</h2>
-                        {company.addresses.map((addr) => (
-                            <div key={addr.id} className="border p-4 rounded mb-4">
-                                <p className="font-bold">{addr.address}</p>
-                                <p>
-                                    Lat: {addr.latitude}, Lon: {addr.longitude}
-                                </p>
-                                <p>Status: {addr.isActive ? "Active" : "Inactive"}</p>
-                                <div className="mt-2">
-                                    <h3 className="font-semibold">Address Video</h3>
-                                    {addr.videos.length > 0 ? (
-                                        <video controls className="w-full mt-2">
-                                            <source src={addr.videos[0].url} type="video/mp4" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    ) : (
-                                        <p>No video for this address.</p>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        setEditingAddressId(addr.id);
-                                        setShowAddressForm(true);
-                                    }}
-                                    className="bg-green-500 text-white px-4 py-2 rounded mt-2"
-                                >
-                                    Edit Address
-                                </button>
-                                {editingAddressId === addr.id && showAddressForm && (
-                                    <CompanyAddressForm
-                                        initialData={{
-                                            address: addr.address,
-                                            latitude: addr.latitude,
-                                            longitude: addr.longitude,
-                                            isActive: addr.isActive,
-                                            video: addr.videos[0]
-                                                ? {
-                                                    name: addr.videos[0].name,
-                                                    activeFromDate: addr.videos[0].activeFromDate,
-                                                    activeToDate: addr.videos[0].activeToDate,
-                                                }
-                                                : undefined,
-                                        }}
-                                        onSubmit={(data) => handleAddressUpdate(addr.id, data)}
-                                    />
-                                )}
-                            </div>
-                        ))}
-                        <button
-                            onClick={() => {
-                                setEditingAddressId(null);
-                                setShowAddressForm(true);
-                            }}
-                            className="bg-blue-500 text-white px-4 py-2 rounded"
-                        >
-                            Add New Address
-                        </button>
-                        {editingAddressId === null && showAddressForm && (
-                            <CompanyAddressForm onSubmit={handleAddressCreate} />
-                        )}
-                    </div>
-                </>
-            ) : (
-                <p>Loading company details...</p>
+            {/* Company Video Upload */}
+            <div className="mb-4">
+                <h2 className="text-xl font-semibold">Company Video</h2>
+                <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            handleUploadCompanyVideo(e.target.files[0]);
+                        }
+                    }}
+                />
+            </div>
+
+            {/* Edit Company Info */}
+            <button
+                onClick={() => setShowCompanyForm(!showCompanyForm)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mb-6"
+            >
+                {showCompanyForm ? "Cancel" : "Edit Company Info"}
+            </button>
+            {showCompanyForm && (
+                <CompanyForm
+                    initialData={{
+                        name: company.name,
+                        description: company.description,
+                        isActive: company.isActive,
+                    }}
+                    onSubmit={handleUpdateCompany}
+                />
             )}
+
+            {/* Addresses */}
+            <div className="mt-8">
+                <h2 className="text-2xl font-semibold mb-4">Addresses</h2>
+                {initialAddresses.length > 0 ? (
+                    initialAddresses.map((addr) => (
+                        <div key={addr.id} className="border p-4 rounded mb-4">
+                            <p className="font-bold">{addr.address}</p>
+                            <p>Lat: {addr.latitude}, Lon: {addr.longitude}</p>
+                            <p>Status: {addr.isActive ? "Active" : "Inactive"}</p>
+
+                            {/* Address Video Upload */}
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        handleUploadAddressVideo(addr.id, e.target.files[0]);
+                                    }
+                                }}
+                            />
+
+                            <button
+                                onClick={() => {
+                                    setEditingAddress(addr);
+                                    setShowAddressForm(true);
+                                }}
+                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition mt-2"
+                            >
+                                Edit Address
+                            </button>
+                        </div>
+                    ))
+                ) : (
+                    <p>No addresses found.</p>
+                )}
+
+                {/* Create New Address */}
+                <button
+                    onClick={() => {
+                        setEditingAddress(null);
+                        setShowAddressForm(true);
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                >
+                    Add New Address
+                </button>
+
+                {showAddressForm && (
+                    <CompanyAddressForm
+                        initialData={
+                            editingAddress
+                                ? {
+                                    companyId: company.id,
+                                    address: editingAddress.address,
+                                    latitude: editingAddress.latitude,
+                                    longitude: editingAddress.longitude,
+                                    isActive: editingAddress.isActive,
+                                }
+                                : {
+                                    companyId: company.id,
+                                    address: "",
+                                    latitude: 0,
+                                    longitude: 0,
+                                    isActive: true,
+                                }
+                        }
+                        onSubmit={(data) => {
+                            if (editingAddress) {
+                                // Update existing address
+                                handleUpdateAddress(editingAddress.id, {
+                                    address: data.address,
+                                    latitude: data.latitude,
+                                    longitude: data.longitude,
+                                    isActive: data.isActive,
+                                });
+                            } else {
+                                // Create new address
+                                handleCreateAddress(data);
+                            }
+                        }}
+                        onCancel={() => {
+                            setShowAddressForm(false);
+                            setEditingAddress(null);
+                        }}
+                    />
+                )}
+            </div>
         </div>
     );
 };

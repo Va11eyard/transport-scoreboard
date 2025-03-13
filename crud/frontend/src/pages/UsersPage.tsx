@@ -1,4 +1,3 @@
-// /src/pages/UsersPage.tsx
 import React, { useState, useEffect } from "react";
 import UserList from "../components/Users/UserList";
 import UserCard from "../components/Users/UserCard";
@@ -36,7 +35,9 @@ const UsersPage: React.FC = () => {
     setSelectedUser(user);
   };
 
-  const handleCreateUser = async (userData: Omit<User, "id"> & { password?: string }) => {
+  const handleCreateUser = async (
+      userData: Omit<User, "id"> & { password?: string }
+  ) => {
     try {
       await createUser(userData);
       fetchUsers();
@@ -46,7 +47,10 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleUpdateUser = async (userId: number, userData: Partial<User>) => {
+  const handleUpdateUser = async (
+      userId: number,
+      userData: Partial<User>
+  ) => {
     try {
       await updateUser(userId, userData);
       fetchUsers();
@@ -71,6 +75,8 @@ const UsersPage: React.FC = () => {
       <Layout>
         <h1 className="text-2xl font-bold mb-4">Users</h1>
         {error && <p className="text-red-500">{error}</p>}
+
+        {/* Add New User Button */}
         <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
             onClick={() => {
@@ -80,31 +86,48 @@ const UsersPage: React.FC = () => {
         >
           Add New User
         </button>
+
+        {/* Main Layout */}
         <div className="flex flex-col md:flex-row gap-4">
+          {/* User List */}
           <div className="md:w-2/3">
             <UserList users={users} onSelectUser={handleSelectUser} />
           </div>
+
+          {/* User Card */}
           <div className="md:w-1/3">
-            {selectedUser && (
-                <UserCard user={selectedUser} onEdit={() => setIsFormOpen(true)} onDelete={() => handleDeleteUser(selectedUser.id)} />
+            {selectedUser && !isFormOpen && (
+                <UserCard
+                    user={selectedUser}
+                    onEdit={() => setIsFormOpen(true)}
+                    onDelete={() => handleDeleteUser(selectedUser.id)}
+                />
             )}
           </div>
         </div>
+
+        {/* User Form (Create or Edit) */}
         {isFormOpen && (
-            <UserForm
-                user={selectedUser || undefined}
-                onSubmit={(userData) => {
-                  if (selectedUser) {
-                    handleUpdateUser(selectedUser.id, userData);
-                  } else {
-                    handleCreateUser(userData as Omit<User, "id"> & { password?: string });
-                  }
-                }}
-                onCancel={() => {
-                  setIsFormOpen(false);
-                  setSelectedUser(null);
-                }}
-            />
+            <div className="mt-6">
+              <UserForm
+                  user={selectedUser || undefined}
+                  onSubmit={(userData) => {
+                    if (selectedUser) {
+                      // Editing existing user
+                      handleUpdateUser(selectedUser.id, userData);
+                    } else {
+                      // Creating new user
+                      handleCreateUser(userData as Omit<User, "id"> & {
+                        password?: string;
+                      });
+                    }
+                  }}
+                  onCancel={() => {
+                    setIsFormOpen(false);
+                    setSelectedUser(null);
+                  }}
+              />
+            </div>
         )}
       </Layout>
   );

@@ -1,4 +1,3 @@
-// /src/pages/VideosPage.tsx
 import React, { useState, useEffect } from "react";
 import VideoList from "../components/Videos/VideoList";
 import VideoUpload from "../components/Videos/VideoUpload";
@@ -62,9 +61,23 @@ const VideosPage: React.FC = () => {
         <VideoUpload onUpload={handleUploadVideo} />
         <div className="flex flex-col md:flex-row mt-8 gap-4">
           <div className="md:w-1/3">
-            <VideoList videos={videos} onSelectVideo={handleSelectVideo} onDeleteVideo={handleDeleteVideo} />
+            <VideoList
+                videos={videos}
+                onSelectVideo={handleSelectVideo}
+                onDeleteVideo={handleDeleteVideo}
+            />
           </div>
-          <div className="md:w-2/3">{selectedVideo && <VideoPlayer video={selectedVideo} />}</div>
+          <div className="md:w-2/3 border border-gray-300 rounded p-4 flex items-center justify-center">
+            {selectedVideo ? (
+                <VideoPlayer
+                    key={selectedVideo.id} // Force re-mount on video change
+                    video={selectedVideo}
+                    onClose={() => setSelectedVideo(null)}
+                />
+            ) : (
+                <p className="text-gray-500">Select a video to play</p>
+            )}
+          </div>
         </div>
       </Layout>
   );

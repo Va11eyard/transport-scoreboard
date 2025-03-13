@@ -34,11 +34,10 @@ const Register: React.FC = () => {
 
   return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden">
-          <div className="px-6 py-8">
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">Create your account</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <input type="hidden" name="remember" value="true" />
+        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email address
@@ -49,7 +48,7 @@ const Register: React.FC = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="mt-1 block w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 placeholder-gray-400"
                     placeholder="Email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -66,7 +65,7 @@ const Register: React.FC = () => {
                     type="password"
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="mt-1 block w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 placeholder-gray-400"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
@@ -83,26 +82,26 @@ const Register: React.FC = () => {
                     type="password"
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="mt-1 block w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 placeholder-gray-400"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={isLoading}
                 />
               </div>
-              {error && <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</div>}
-              <button
-                  type="submit"
-                  className={`w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-800 hover:bg-primary-hover transition ${isLoading ? "opacity-75 cursor-not-allowed" : ""}`}
-                  disabled={isLoading}
-              >
-                {isLoading ? "Registering..." : "Register"}
-              </button>
-            </form>
-          </div>
-          <div className="px-6 py-4 bg-gray-50 border-t">
-            <p className="text-sm text-center">
+            </div>
+            {error && <div className="text-red-500 text-sm text-center p-2 rounded">{error}</div>}
+            <button
+                type="submit"
+                className={`w-full flex justify-center py-3 px-4 rounded-md text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${isLoading ? "opacity-75 cursor-not-allowed" : ""}`}
+                disabled={isLoading}
+            >
+              {isLoading ? "Registering..." : "Register"}
+            </button>
+          </form>
+          <div className="text-sm text-center mt-4">
+            <p>
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-primary hover:text-primary-hover">
+              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-700">
                 Sign in
               </Link>
             </p>

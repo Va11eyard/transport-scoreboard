@@ -18,28 +18,35 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ onUpload }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded shadow max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="w-full space-y-6 p-8 bg-white rounded-xl shadow-xl">
             <div>
-                <label className="block text-sm font-medium">Video Title</label>
+                <label className="block text-lg font-medium text-gray-700">
+                    Video Title
+                </label>
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
-                    className="mt-1 block w-full border rounded p-2"
+                    className="mt-2 block w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring focus:border-blue-300"
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium">Choose Video File</label>
+                <label className="block text-lg font-medium text-gray-700">
+                    Choose Video File
+                </label>
                 <input
                     type="file"
                     accept="video/*"
                     onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                     required
-                    className="mt-1 block w-full"
+                    className="mt-2 block w-full text-gray-700"
                 />
             </div>
-            <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded hover:bg-primary-hover transition">
+            <button
+                type="submit"
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-md shadow hover:opacity-90 transition duration-300"
+            >
                 Upload Video
             </button>
         </form>
